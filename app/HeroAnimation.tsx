@@ -57,7 +57,7 @@ export default function HeroAnimation() {
       {/* Outcome */}
       <g className="ha-chip">
         <rect x="214" y="352" width="132" height="32" rx="16" className="ha-chip-bg" />
-        <text x="280" y="373" textAnchor="middle" className="ha-chip-text">✓ AI-screened</text>
+        <text x="280" y="373" textAnchor="middle" className="ha-chip-text">AI-screened</text>
       </g>
       <g className="ha-connected">
         <rect x="186" y="56" width="188" height="44" rx="22" className="ha-connected-bg" />

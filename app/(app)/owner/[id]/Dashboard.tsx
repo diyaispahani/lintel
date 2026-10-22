@@ -62,11 +62,11 @@ export default function Dashboard({ listingId, ownerKey }: { listingId: string; 
 
       <div className="card">
         {enquiries.length === 0 ? (
-          <p className="stats">No enquiries yet. Your listing is live and your phone is quiet. 📵</p>
+          <p className="stats">No enquiries yet. Your listing is live and your phone is quiet.</p>
         ) : (
           <p className="stats">
             {enquiries.length} {enquiries.length === 1 ? "enquiry" : "enquiries"}: {blocked.length} blocked as brokers or sales, {genuine} genuine
-            {unclear > 0 && `, ${unclear} unclear`}. 📵 Your phone rang 0 times.
+            {unclear > 0 && `, ${unclear} unclear`}. Your phone rang 0 times.
           </p>
         )}
       </div>
@@ -95,7 +95,7 @@ export default function Dashboard({ listingId, ownerKey }: { listingId: string; 
           </div>
           {r.note && <p style={{ margin: "6px 0 10px" }}>{r.note}</p>}
           {r.invited ? (
-            <span className="connected">✉️ Invited. They&apos;ll see your listing on their page.</span>
+            <span className="connected">Invited. They&apos;ll see your listing on their page.</span>
           ) : (
             <button onClick={() => post(`/api/requests/${r.id}/invite`, { listingId })}>Invite to enquire</button>
           )}
@@ -115,7 +115,7 @@ function EnquiryCard({ e, onConnect }: { e: Item; onConnect: () => void }) {
       <p style={{ margin: "8px 0 0" }}>{e.summary}</p>
       <p className="reason">Why: {e.reason}</p>
       {e.seeker ? (
-        <span className="connected">🤝 Connected: {e.seeker.name}, {e.seeker.phone}</span>
+        <span className="connected">Connected: {e.seeker.name}, {e.seeker.phone}</span>
       ) : (
         <button onClick={onConnect}>Connect</button>
       )}

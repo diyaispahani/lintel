@@ -21,7 +21,7 @@ export default function MyGatePage() {
             <strong>{n.flat} · {n.society}</strong>
             <span className="badge mygate">Vacating {formatDate(n.movingOut)}</span>
           </div>
-          <div className="muted">📍 {n.area} · {n.bhk} BHK · Owner: {n.ownerName} (verified resident)</div>
+          <div className="muted">{n.area} · {n.bhk} BHK · Owner: {n.ownerName} (verified resident)</div>
           <Link href={`/list?mygate=${n.id}`} className="button" style={{ marginTop: 10 }}>
             List on GharDirect →
           </Link>

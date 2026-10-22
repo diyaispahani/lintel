@@ -66,7 +66,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
     return (
       <>
         <p className="eyebrow">You&apos;re live</p>
-        <h1>Your listing is published 🎉</h1>
+        <h1>Your listing is published</h1>
         <p className="muted">Your number is hidden. Every enquiry is screened by AI, and you choose who to connect with.</p>
         <div className="card">
           <h2>Your public listing</h2>
@@ -90,7 +90,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
       <p className="muted">Your number stays hidden until you choose to connect.</p>
 
       {notice ? (
-        <div className="demo-banner">✓ Imported from MyGate: flat {notice.flat}, {notice.society}. Owner verified as a resident. (Demo data)</div>
+        <div className="demo-banner">Imported from MyGate: flat {notice.flat}, {notice.society}. Owner verified as a resident. (Demo data)</div>
       ) : (
         <p className="small">Live in a MyGate society? <Link href="/mygate">Import your flat from MyGate in one tap →</Link></p>
       )}
@@ -239,7 +239,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
               <input id="ownerPhone" value={form.ownerPhone} onChange={set("ownerPhone")} inputMode="tel" placeholder="98xxxxxxxx" />
             </div>
           </div>
-          <p className="muted small" style={{ marginTop: 10 }}>🔒 Never shown publicly and never sent to the AI. Shared only with people you Connect with.</p>
+          <p className="muted small" style={{ marginTop: 10 }}>Never shown publicly and never sent to the AI. Shared only with people you Connect with.</p>
         </fieldset>
 
         <button className="full btn-lg" disabled={saving}>{saving ? "Publishing…" : "Publish listing"}</button>

@@ -91,7 +91,7 @@ export default function Chat({ listingId, dealType }: { listingId: string; dealT
     return (
       <form onSubmit={startChat} className="card">
         <h2>First, how can the owner reach you?</h2>
-        <p className="muted small">🔒 Only shared with the owner if you both agree to connect. Never sent to the AI.</p>
+        <p className="muted small">Only shared with the owner if you both agree to connect. Never sent to the AI.</p>
         <div className="two">
           <div>
             <label htmlFor="name">Your name</label>
@@ -120,9 +120,9 @@ export default function Chat({ listingId, dealType }: { listingId: string; dealT
 
       {step === "sent" ? (
         owner ? (
-          <p className="connected">🤝 Connected! {owner.name} (owner): {owner.phone}. The owner has your number too.</p>
+          <p className="connected">Connected! {owner.name} (owner): {owner.phone}. The owner has your number too.</p>
         ) : (
-          <p className="muted small">✔ Enquiry sent. Keep this page open: if the owner wants to connect, their number appears here.</p>
+          <p className="muted small">Enquiry sent. Keep this page open: if the owner wants to connect, their number appears here.</p>
         )
       ) : (
         <form onSubmit={send} className="composer">

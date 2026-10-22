@@ -32,7 +32,7 @@ export default async function MyRequest({
         {formatPrice(request.maxBudget, request.dealType)}
       </p>
 
-      <h2>✉️ Owners who invited you</h2>
+      <h2>Owners who invited you</h2>
       {invited.length === 0 ? <div className="card muted">No invites yet. Owners with a match will see your request.</div> : <div className="lgrid">{invited.map((l) => <ListingCard key={l.id} l={l} />)}</div>}
 
       <h2 style={{ marginTop: 24 }}>Other matching properties</h2>

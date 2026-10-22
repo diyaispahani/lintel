@@ -9,28 +9,30 @@ import SavingsCalc from "./SavingsCalc";
 export const dynamic = "force-dynamic";
 
 const STEPS_SEEKER = [
-  ["Find a home", "Every listing is posted by the owner. Filter by deposit, lock-in, pets and more."],
-  ["Answer 4 quick questions", "Our AI asks what the owner needs to know, so they can tell you're genuine."],
-  ["Connect when you both say yes", "Numbers are shared only when the owner taps Connect. No middlemen."],
+  ["Find a home", "Every listing comes from its owner. Filter by deposit, lock-in, pets and more."],
+  ["Answer four questions", "A short, private conversation so the owner knows you're genuine."],
+  ["Connect when you both say yes", "Numbers are exchanged only when the owner chooses you."],
 ];
 const STEPS_OWNER = [
-  ["List in two minutes", "Or one tap from MyGate when you're moving out. Your number stays hidden."],
-  ["Brokers get filtered out", "AI reads every enquiry and hides brokers and sales pitches."],
-  ["Pick who you talk to", "See a shortlist with a 2-line summary each, and connect with the right one."],
+  ["List in two minutes", "Or in one tap from MyGate when a flat is being vacated. Your number stays hidden."],
+  ["Brokers never reach you", "Every enquiry is read first. Brokers and sales pitches are set aside."],
+  ["Choose who you speak to", "A considered shortlist, each with a two-line summary. Connect with the right one."],
 ];
 
 export default function Landing() {
-  const featured = allListings().filter((l) => l.mygateVerified).slice(0, 3).map(toPublic);
+  const listings = allListings();
+  const featured = listings.filter((l) => l.mygateVerified).slice(0, 3).map(toPublic);
+  const cities = new Set(listings.map((l) => l.area.split(",").pop()?.trim())).size;
 
   return (
     <>
       <section className="hero">
         <div className="container hero-grid">
           <div className="hero-copy">
-            <p className="eyebrow">Zero brokerage · Owner-direct</p>
-            <h1 className="hero-title">Home, <em>direct.</em></h1>
+            <p className="eyebrow">Owner-direct real estate</p>
+            <h1 className="hero-title">Home,<br /><em>direct.</em></h1>
             <p className="hero-sub">
-              Rent, buy or lease straight from owners. No brokers, no spam calls. An AI checks every enquiry, and you connect only when you both say yes.
+              Rent, buy or lease straight from the people who own it. No brokers, no calls you didn&apos;t ask for, and no fees. Ever.
             </p>
 
             <form action="/listings" className="search">
@@ -43,15 +45,15 @@ export default function Landing() {
                 ))}
               </div>
               <div className="search-row">
-                <input name="q" placeholder="Area, society or city, e.g. HSR Layout" aria-label="Area, society or city" />
+                <input name="q" placeholder="Area, society or city" aria-label="Area, society or city" />
                 <button className="btn-lg">Search</button>
               </div>
             </form>
 
             <ul className="trust">
-              <li>₹0 brokerage, always</li>
-              <li>Owner-listed homes only</li>
-              <li>Your number stays private</li>
+              <li>Zero brokerage</li>
+              <li>Owner-listed only</li>
+              <li>Private until you both agree</li>
             </ul>
           </div>
           <div className="hero-art">
@@ -60,23 +62,34 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="band">
-        <div className="container compare">
+      <div className="container">
+        <div className="metrics">
+          <div className="metric"><strong>₹0</strong><span>Brokerage for owners and seekers</span></div>
+          <div className="metric"><strong>100%</strong><span>Of homes listed by their owners</span></div>
+          <div className="metric"><strong>{listings.length}</strong><span>Homes and spaces across {cities} cities</span></div>
+          <div className="metric"><strong>2-way</strong><span>Consent before any number is shared</span></div>
+        </div>
+      </div>
+
+      <section className="container section">
+        <p className="eyebrow">Why GharDirect</p>
+        <h2 className="section-title">The middleman was never part of the home.</h2>
+        <div className="compare">
           <div className="compare-card old">
-            <p className="eyebrow muted">The old way</p>
-            <h2>Your number goes public. The calls never stop.</h2>
+            <p className="eyebrow" style={{ color: "var(--faint)" }}>The old way</p>
+            <h3>A public number, and calls that never stop.</h3>
             <ul>
-              <li>Brokers flood owners within minutes of listing</li>
+              <li>Brokers reach owners within minutes of listing</li>
               <li>Tenants pay a month&apos;s rent just to be introduced</li>
-              <li>Portals push paid plans with more calls</li>
+              <li>Portals sell paid plans that bring more calls</li>
             </ul>
           </div>
           <div className="compare-card new">
             <p className="eyebrow">With GharDirect</p>
-            <h2>Owner and seeker, nothing in between.</h2>
+            <h3>Owner and seeker, with nothing in between.</h3>
             <ul>
-              <li>Numbers hidden until both sides agree</li>
-              <li>AI screens out brokers and sales pitches</li>
+              <li>Numbers stay private until both sides agree</li>
+              <li>Every enquiry is screened before the owner sees it</li>
               <li>MyGate-verified owners you can trust</li>
             </ul>
           </div>
@@ -85,16 +98,16 @@ export default function Landing() {
 
       <section className="container section">
         <p className="eyebrow">How it works</p>
-        <h2 className="section-title">Simple for both sides.</h2>
+        <h2 className="section-title">Considered for both sides.</h2>
         <div className="how">
-          {[["For seekers", STEPS_SEEKER], ["For owners", STEPS_OWNER]].map(([title, steps]) => (
-            <div key={title as string} className="how-col">
-              <h3>{title as string}</h3>
+          {([["For seekers", STEPS_SEEKER], ["For owners", STEPS_OWNER]] as const).map(([title, steps]) => (
+            <div key={title} className="how-col">
+              <h3>{title}</h3>
               <ol>
-                {(steps as string[][]).map(([h, p], i) => (
+                {steps.map(([h, p], i) => (
                   <li key={h}>
-                    <span className="step-n">{i + 1}</span>
-                    <div><strong>{h}</strong><p className="muted">{p}</p></div>
+                    <span className="step-n">0{i + 1}</span>
+                    <div><strong>{h}</strong><p>{p}</p></div>
                   </li>
                 ))}
               </ol>
@@ -104,12 +117,12 @@ export default function Landing() {
       </section>
 
       <section className="container section">
-        <div className="row between section-head">
+        <div className="section-head">
           <div>
-            <p className="eyebrow">MyGate-verified homes</p>
-            <h2 className="section-title">Fresh from owners this week.</h2>
+            <p className="eyebrow">MyGate-verified</p>
+            <h2 className="section-title" style={{ marginBottom: 0 }}>New from owners this week.</h2>
           </div>
-          <Link href="/listings" className="btn btn-ghost">Explore all homes →</Link>
+          <Link href="/listings" className="btn btn-outline">View all homes</Link>
         </div>
         <div className="lgrid">
           {featured.map((l) => <ListingCard key={l.id} l={l} />)}
@@ -118,9 +131,9 @@ export default function Landing() {
 
       <section className="container section split">
         <div>
-          <p className="eyebrow">Do the maths</p>
+          <p className="eyebrow">The arithmetic</p>
           <h2 className="section-title">Keep the month&apos;s rent a broker would take.</h2>
-          <p className="muted">Slide to your budget. On GharDirect there&apos;s no brokerage for owners or seekers, ever.</p>
+          <p className="section-lede">There is no brokerage on GharDirect, for owners or seekers. Move the slider to see what that means for you.</p>
         </div>
         <SavingsCalc />
       </section>
@@ -128,28 +141,29 @@ export default function Landing() {
       <section className="container section">
         <div className="mygate-band">
           <div>
-            <p className="eyebrow" style={{ color: "var(--mygate)" }}>MyGate × GharDirect</p>
+            <p className="eyebrow">MyGate × GharDirect</p>
             <h2 className="section-title">Moving out? List it in one tap.</h2>
-            <p className="muted">
-              MyGate knows when a flat is about to be vacated and who really owns it. GharDirect turns that into a verified, broker-free listing,
-              pre-filled and ready to publish.
+            <p className="section-lede" style={{ marginBottom: 28 }}>
+              MyGate knows when a flat is about to be vacated, and who really owns it. GharDirect turns that into a verified,
+              broker-free listing, ready to publish.
             </p>
-            <Link href="/mygate" className="btn btn-ghost">See the MyGate demo →</Link>
+            <Link href="/mygate" className="btn btn-outline">See how it works</Link>
           </div>
           <ul className="mygate-points">
             <li><strong>Move-out alerts</strong><span>Know before the flat goes empty</span></li>
             <li><strong>Verified owners</strong><span>Matched to the society&apos;s flat records</span></li>
-            <li><strong>Trusted badge</strong><span>Seekers see who&apos;s real at a glance</span></li>
+            <li><strong>A badge seekers trust</strong><span>Real owners, recognisable at a glance</span></li>
           </ul>
         </div>
       </section>
 
       <section className="container section">
         <div className="cta">
-          <h2 className="display">Ready to go direct?</h2>
+          <p className="eyebrow">Begin</p>
+          <h2>Ready to go <em>direct?</em></h2>
           <p>Find your next home, or list yours, without paying a single rupee in brokerage.</p>
-          <div className="row" style={{ justifyContent: "center" }}>
-            <Link href="/listings" className="btn btn-brass btn-lg">Explore homes</Link>
+          <div className="row" style={{ justifyContent: "center", gap: 12 }}>
+            <Link href="/listings" className="btn btn-lg">Explore homes</Link>
             <Link href="/list" className="btn btn-lg cta-ghost">List your property</Link>
           </div>
         </div>

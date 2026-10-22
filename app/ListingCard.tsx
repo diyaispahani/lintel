@@ -10,7 +10,7 @@ export default function ListingCard({ l }: { l: PublicListing }) {
       <div className={`lcover ${l.dealType}`}>
         <PropertyArt type={l.propertyType} />
         <span className="badge deal lcover-tl">{DEAL_LABEL[l.dealType]}</span>
-        {l.mygateVerified && <span className="badge mygate lcover-tr">✓ MyGate verified</span>}
+        {l.mygateVerified && <span className="badge mygate lcover-tr">MyGate verified</span>}
       </div>
       <div className="lbody">
         <div className="price">{formatPrice(l.price, l.dealType)}</div>
@@ -25,7 +25,7 @@ export default function ListingCard({ l }: { l: PublicListing }) {
           {l.dealType === "sale" ? (
             <>
               <span>{l.possession}</span>
-              {l.reraRegistered && <span>RERA ✓</span>}
+              {l.reraRegistered && <span>RERA</span>}
             </>
           ) : (
             <>

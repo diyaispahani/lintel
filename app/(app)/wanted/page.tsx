@@ -33,7 +33,7 @@ export default function Wanted() {
     const link = `/wanted/${created.id}?key=${created.key}`;
     return (
       <>
-        <h1>You&apos;re on the list ✅</h1>
+        <h1>You&apos;re on the list</h1>
         <p className="muted">Owners with a matching property can now invite you. Your number stays private.</p>
         <div className="card">
           <h2>Your private page</h2>
@@ -87,7 +87,7 @@ export default function Wanted() {
             <input id="phone" value={form.phone} onChange={set("phone")} inputMode="tel" placeholder="98xxxxxxxx" />
           </div>
         </div>
-        <p className="muted small">🔒 Owners see your first name and needs, never your number.</p>
+        <p className="muted small">Owners see your first name and needs, never your number.</p>
         <button className="full" disabled={saving}>{saving ? "Saving…" : "Post my request"}</button>
         {error && <div className="error">{error}</div>}
       </form>

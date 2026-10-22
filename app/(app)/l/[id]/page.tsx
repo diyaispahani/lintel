@@ -25,7 +25,7 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
     ...(l.dealType === "sale"
       ? ([
           ["Possession", l.possession],
-          ["RERA", l.reraRegistered ? "Registered ✓" : "Not registered"],
+          ["RERA", l.reraRegistered ? "Registered" : "Not registered"],
         ] as [string, string][])
       : ([
           ["Security deposit", `${l.depositMonths} months (${inr((l.depositMonths ?? 0) * l.price)})`],
@@ -42,14 +42,18 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
       <div className={`lcover detail-cover ${l.dealType}`}>
         <PropertyArt type={l.propertyType} />
       </div>
-      <div className="row" style={{ marginTop: 18 }}>
-        <span className="badge deal">{DEAL_LABEL[l.dealType]}</span>
-        {l.mygateVerified && <span className="badge mygate">✓ MyGate verified owner</span>}
-        <span className="badge owner">Listed by {l.ownerName} (owner) · ₹0 brokerage</span>
+      <div className="detail-head">
+        <div>
+          <div className="row" style={{ marginBottom: 14 }}>
+            <span className="badge deal">{DEAL_LABEL[l.dealType]}</span>
+            {l.mygateVerified && <span className="badge mygate">MyGate verified owner</span>}
+            <span className="badge owner">₹0 brokerage</span>
+          </div>
+          <h1 style={{ margin: 0 }}>{l.title}</h1>
+          <p className="muted" style={{ margin: "6px 0 0" }}>{l.society} · {l.area} · Listed by {l.ownerName}, the owner</p>
+        </div>
+        <p className="price" style={{ margin: 0, fontSize: "2.2rem" }}>{formatPrice(l.price, l.dealType)}</p>
       </div>
-      <h1 style={{ marginTop: 12 }}>{l.title}</h1>
-      <p className="price" style={{ margin: 0, fontSize: "1.8rem" }}>{formatPrice(l.price, l.dealType)}</p>
-      <p className="muted" style={{ marginTop: 4 }}>📍 {l.society}, {l.area}</p>
 
       <div className="facts">
         {facts.map(([k, v]) => (

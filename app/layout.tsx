@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import Link from "next/link";
 import Logo from "./Logo";
 import "./globals.css";
 
-const display = Fraunces({ subsets: ["latin"], variable: "--font-display", axes: ["opsz"] });
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-display" });
 const body = Inter({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/listings">Explore homes</Link>
               <Link href="/wanted">Post a requirement</Link>
               <Link href="/mygate">MyGate</Link>
-              <Link href="/list" className="btn btn-primary btn-sm">List your property</Link>
+              <Link href="/list" className="btn btn-outline btn-sm">List your property</Link>
             </nav>
           </div>
         </header>
