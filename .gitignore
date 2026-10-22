@@ -9,3 +9,9 @@ next-env.d.ts
 .env.local
 .vercel
 .vercel-temporary/
+
+# Tooling added by integrations (not part of the app)
+.agents/
+.claude/
+skills-lock.json
+!.env.example
