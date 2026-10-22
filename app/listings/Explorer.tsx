@@ -131,7 +131,7 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
       <div className="explore-head">
         <div>
           <p className="eyebrow">Owner-listed · ₹0 brokerage</p>
-          <h1>{f.deal ? `${DEAL_LABEL[f.deal]} directly from owners` : "Homes and spaces, straight from owners"}</h1>
+          <h1>{f.deal ? `${DEAL_LABEL[f.deal]} homes` : "Homes and spaces"}<em>straight from owners</em></h1>
         </div>
         <div className="seg seg-lg" role="radiogroup" aria-label="Deal type">
           {([["", "All"], ["rent", "Rent"], ["sale", "Buy"], ["lease", "Lease"]] as const).map(([v, label]) => (
