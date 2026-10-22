@@ -1,6 +1,6 @@
-// The owner's private shortlist. The secret key comes from the owner's link.
+// The owner's private dashboard. The secret key comes from the owner's link.
 
-import Shortlist from "./Shortlist";
+import Dashboard from "./Dashboard";
 
 export default async function OwnerPage({
   params,
@@ -11,5 +11,5 @@ export default async function OwnerPage({
 }) {
   const { id } = await params;
   const { key } = await searchParams;
-  return <Shortlist listingId={id} ownerKey={key ?? ""} />;
+  return <Dashboard listingId={id} ownerKey={key ?? ""} />;
 }

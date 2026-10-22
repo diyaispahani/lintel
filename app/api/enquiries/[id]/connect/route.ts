@@ -1,4 +1,4 @@
-// The owner chooses to share their number with one seeker.
+// The owner chooses to connect with one seeker: from now on both see each other's number.
 
 import { getEnquiry, getListing } from "@/lib/store";
 
@@ -10,6 +10,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   if (!enquiry || !listing || body.key !== listing.ownerKey) {
     return Response.json({ error: "Not allowed." }, { status: 403 });
   }
-  enquiry.shared = true;
-  return Response.json({ shared: true });
+  enquiry.connected = true;
+  return Response.json({ connected: true });
 }
