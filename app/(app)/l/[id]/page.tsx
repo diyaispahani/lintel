@@ -5,7 +5,10 @@ import { notFound } from "next/navigation";
 import { PropertyArt } from "@/app/ListingCard";
 import { DEAL_LABEL, formatDate, formatPrice } from "@/lib/match";
 import { getListing, toPublic } from "@/lib/store";
+import { streetViewUrl } from "@/lib/places";
 import Chat from "./Chat";
+import EmiCalculator from "./EmiCalculator";
+import Neighbourhood from "./Neighbourhood";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +49,10 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         <div>
           <div className="row" style={{ marginBottom: 14 }}>
             <span className="badge deal">{DEAL_LABEL[l.dealType]}</span>
-            {l.mygateVerified && <span className="badge mygate">MyGate verified owner</span>}
+            {l.kycVerified && <span className="badge owner">KYC-verified owner</span>}
+            {l.mygateVerified && <span className="badge mygate">MyGate verified</span>}
+            {l.dealType !== "sale" && l.tenantPreference !== "Any" && <span className="badge plain">{l.tenantPreference === "Company" ? "Company lease" : `${l.tenantPreference} only`}</span>}
+            {l.sample && <span className="badge plain" title="Demo data: not a real home">Sample</span>}
             <span className="badge owner">₹0 brokerage</span>
           </div>
           <h1 style={{ margin: 0 }}>{l.title}</h1>
@@ -66,6 +72,12 @@ export default async function ListingPage({ params }: { params: Promise<{ id: st
         <div className="amenities">
           {l.amenities.map((a) => <span key={a} className="badge plain">{a}</span>)}
         </div>
+      )}
+
+      {l.dealType === "sale" && <EmiCalculator price={l.price} />}
+
+      {l.lat !== null && l.lng !== null && (
+        <Neighbourhood id={l.id} lat={l.lat} lng={l.lng} title={l.title} streetView={streetViewUrl({ lat: l.lat, lng: l.lng })} />
       )}
 
       <div className="card" style={{ marginTop: 24 }}>

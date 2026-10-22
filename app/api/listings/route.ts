@@ -1,6 +1,7 @@
 // Owner creates a listing. The phone number is stored, never shown publicly.
 
 import { getNotice } from "@/lib/mygate";
+import { coordsFor, geocode } from "@/lib/places";
 import { validPhone } from "@/lib/rules";
 import { AMENITIES, createListing, type DealType, type PropertyType } from "@/lib/store";
 
@@ -66,6 +67,8 @@ export async function POST(req: Request) {
     ownerName: field("ownerName", 40) || "Owner",
     ownerPhone,
     mygateVerified: Boolean(notice && notice.society === society),
+    kycVerified: body.kyc === true,
+    ...(coordsFor(area, title + Date.now()) ?? (await geocode(`${society}, ${area}`)) ?? (await geocode(area)) ?? { lat: null, lng: null }),
   });
   return Response.json({ id: listing.id, ownerKey: listing.ownerKey });
 }

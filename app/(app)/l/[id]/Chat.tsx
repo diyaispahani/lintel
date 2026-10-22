@@ -5,6 +5,7 @@
 // 3. a waiting screen that shows the owner's number once the owner taps Connect.
 
 import { useEffect, useRef, useState } from "react";
+import KycStep from "@/app/KycStep";
 import type { DealType } from "@/lib/store";
 
 type Turn = { role: "ai" | "seeker"; text: string };
@@ -18,6 +19,7 @@ const GREETING: Record<DealType, string> = {
 export default function Chat({ listingId, dealType }: { listingId: string; dealType: DealType }) {
   const [step, setStep] = useState<"closed" | "contact" | "chat" | "sent">("closed");
   const [contact, setContact] = useState({ name: "", phone: "" });
+  const [kyc, setKyc] = useState(false);
   const [transcript, setTranscript] = useState<Turn[]>([{ role: "ai", text: GREETING[dealType] }]);
   const [draft, setDraft] = useState("");
   const [waiting, setWaiting] = useState(false);
@@ -44,7 +46,7 @@ export default function Chat({ listingId, dealType }: { listingId: string; dealT
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId, contact, transcript: nextTranscript }),
+      body: JSON.stringify({ listingId, contact, kyc, transcript: nextTranscript }),
     }).catch(() => null);
     const data = await res?.json().catch(() => null);
     return res?.ok && data ? { data } : { error: (data?.error as string) ?? "Couldn't reach the assistant. Please try again." };
@@ -102,6 +104,7 @@ export default function Chat({ listingId, dealType }: { listingId: string; dealT
             <input id="phone" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} inputMode="tel" placeholder="98xxxxxxxx" />
           </div>
         </div>
+        <KycStep who="seeker" name={contact.name} phone={contact.phone} verified={kyc} onVerified={setKyc} />
         <button className="full" disabled={waiting}>{waiting ? "Checking…" : "Continue"}</button>
         {error && <div className="error">{error}</div>}
       </form>

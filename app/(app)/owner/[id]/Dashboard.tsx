@@ -109,6 +109,7 @@ function EnquiryCard({ e, onConnect }: { e: Item; onConnect: () => void }) {
   return (
     <div className="card">
       <span className={`badge ${e.label}`}>{e.label}</span>{" "}
+      {e.seekerKyc && <><span className="badge owner">KYC-verified seeker</span>{" "}</>}
       <span className="muted small">
         {Math.round(e.confidence * 100)}% sure{e.aiLabel !== e.label && ` (AI said ${e.aiLabel}, low confidence)`}
       </span>

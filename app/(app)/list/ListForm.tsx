@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import KycStep from "@/app/KycStep";
 import type { MoveOutNotice } from "@/lib/mygate";
 import { AMENITIES, type DealType } from "@/lib/store";
 
@@ -33,6 +34,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
   });
   const [petsAllowed, setPets] = useState(false);
   const [reraRegistered, setRera] = useState(false);
+  const [kyc, setKyc] = useState(false);
   const [amenities, setAmenities] = useState<string[]>(["Lift", "Power backup", "24x7 security"]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -52,7 +54,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
     const res = await fetch("/api/listings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, petsAllowed, reraRegistered, amenities, mygateId: notice?.id }),
+      body: JSON.stringify({ ...form, petsAllowed, reraRegistered, amenities, kyc, mygateId: notice?.id }),
     }).catch(() => null);
     const data = await res?.json().catch(() => null);
     setSaving(false);
@@ -239,6 +241,7 @@ export default function ListForm({ notice }: { notice: MoveOutNotice | null }) {
               <input id="ownerPhone" value={form.ownerPhone} onChange={set("ownerPhone")} inputMode="tel" placeholder="98xxxxxxxx" />
             </div>
           </div>
+          <KycStep who="owner" name={form.ownerName} phone={form.ownerPhone} verified={kyc} onVerified={setKyc} />
           <p className="muted small" style={{ marginTop: 10 }}>Never shown publicly and never sent to the AI. Shared only with people you Connect with.</p>
         </fieldset>
 

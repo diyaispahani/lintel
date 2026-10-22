@@ -2,7 +2,8 @@
 // All names and numbers are made up (numbers start with 90000).
 // Every seed listing's dashboard is at /owner/<id>?key=demo
 
-import type { Listing, Request } from "./store";
+import { coordsFor } from "./places";
+import type { Listing, PropertyType, Request, TenantPreference } from "./store";
 
 const day = 24 * 60 * 60 * 1000;
 const now = Date.now();
@@ -26,6 +27,9 @@ const base: Omit<Listing, "id" | "dealType" | "title" | "society" | "area" | "pr
   reraRegistered: false,
   details: "",
   mygateVerified: false,
+  kycVerified: true,
+  lat: null,
+  lng: null,
 };
 
 let n = 0;
@@ -36,7 +40,7 @@ const L = (fields: Partial<Listing> & Pick<Listing, "id" | "dealType" | "title" 
   ...fields,
 });
 
-export const seedListings: Listing[] = [
+const core: Listing[] = [
   L({
     id: "hsr-2bhk", dealType: "rent", title: "Sunny 2BHK, semi-furnished", society: "Prestige Lakeside", area: "HSR Layout, Bengaluru",
     price: 32000, areaSqft: 1150, depositMonths: 3, lockInMonths: 11, maintenance: 0, tenantPreference: "Family", petsAllowed: true,
@@ -110,6 +114,48 @@ export const seedListings: Listing[] = [
     ownerName: "Suresh", mygateVerified: true, details: "30 workstations, 2 cabins, meeting room, pantry. Plug and play.",
   }),
 ];
+
+// More sample homes so the map has something to show in every city.
+// [id, deal, type, bhk, title, society, area, price, sqft, furnishing, tenants, pets, deposit, lock-in, maintenance, possession, rera, owner, mygate, kyc]
+type Row = [string, Listing["dealType"], PropertyType, number | null, string, string, string, number, number, string, TenantPreference, boolean, number | null, number | null, number, Listing["possession"], boolean, string, boolean, boolean];
+const ROWS: Row[] = [
+  ["koramangala-2bhk", "rent", "Apartment", 2, "Quiet 2BHK off 80 Feet Road", "Raheja Residency", "Koramangala, Bengaluru", 42000, 1100, "Semi-furnished", "Family", false, 3, 11, 2500, "Ready to move", false, "Nisha", true, true],
+  ["jayanagar-1bhk", "rent", "Independent house", 1, "1BHK portion with terrace access", "Independent house", "Jayanagar, Bengaluru", 18000, 550, "Unfurnished", "Bachelors", false, 2, 6, 0, "Ready to move", false, "Ramesh", false, true],
+  ["hebbal-3bhk", "rent", "Apartment", 3, "Lake-facing 3BHK, high floor", "Brigade Lakefront", "Hebbal, Bengaluru", 65000, 1750, "Fully furnished", "Family", true, 4, 11, 5000, "Ready to move", false, "Arvind", true, true],
+  ["ecity-studio", "rent", "Apartment", 1, "Compact 1BHK near Infosys gate", "Ajmera Infinity", "Electronic City, Bengaluru", 15000, 520, "Fully furnished", "Bachelors", false, 2, 6, 1500, "Ready to move", false, "Kiran", false, true],
+  ["bellandur-2bhk-sale", "sale", "Apartment", 2, "2BHK in a gated community", "Salarpuria Greenage", "Bellandur, Bengaluru", 11500000, 1240, "Semi-furnished", "Any", false, null, null, 3500, "Ready to move", true, "Sunita", true, true],
+  ["marathahalli-pg-house", "rent", "Independent house", 4, "4BHK house, ideal for sharing", "Independent house", "Marathahalli, Bengaluru", 55000, 2200, "Semi-furnished", "Bachelors", false, 5, 11, 0, "Ready to move", false, "Prakash", false, false],
+  ["malleshwaram-3bhk-sale", "sale", "Independent house", 3, "Heritage-style 3BHK house", "Independent house", "Malleshwaram, Bengaluru", 32000000, 2400, "Unfurnished", "Any", false, null, null, 0, "Ready to move", false, "Geetha", false, true],
+  ["whitefield-office", "lease", "Office", null, "60-seat office near ITPL", "Prestige Shantiniketan", "Whitefield, Bengaluru", 360000, 4200, "Fully furnished", "Company", false, 8, 36, 30000, "Ready to move", false, "Manoj", false, true],
+  ["sarjapur-2bhk-sale", "sale", "Apartment", 2, "Under-construction 2BHK, tower C", "Godrej Splendour", "Sarjapur Road, Bengaluru", 9800000, 1150, "Unfurnished", "Any", false, null, null, 0, "Under construction", true, "Varun", false, true],
+  ["jpnagar-shop", "lease", "Shop", null, "Corner shop on 24th Main", "JP Plaza", "JP Nagar, Bengaluru", 70000, 380, "Bare shell", "Company", false, 6, 24, 0, "Ready to move", false, "Shobha", false, true],
+  ["powai-1bhk", "rent", "Apartment", 1, "1BHK with lake glimpse", "Hiranandani Gardens", "Powai, Mumbai", 48000, 520, "Semi-furnished", "Bachelors", false, 3, 11, 3500, "Ready to move", false, "Zoya", true, true],
+  ["andheri-2bhk", "rent", "Apartment", 2, "2BHK walking distance to metro", "Lokhandwala Complex", "Andheri West, Mumbai", 75000, 780, "Fully furnished", "Family", true, 3, 11, 4000, "Ready to move", false, "Imran", false, true],
+  ["bandra-3bhk-sale", "sale", "Apartment", 3, "Sea-breeze 3BHK near Carter Road", "Sea Queen", "Bandra West, Mumbai", 72000000, 1450, "Semi-furnished", "Any", false, null, null, 12000, "Ready to move", true, "Cyrus", true, true],
+  ["thane-2bhk-sale", "sale", "Apartment", 2, "2BHK with clubhouse access", "Lodha Amara", "Thane, Mumbai", 13500000, 690, "Unfurnished", "Any", false, null, null, 3000, "Under construction", true, "Pooja", false, true],
+  ["bandra-cafe", "lease", "Shop", null, "Ground-floor café space", "Pali Hill Arcade", "Bandra West, Mumbai", 280000, 650, "Bare shell", "Company", false, 10, 36, 0, "Ready to move", false, "Dinesh", false, true],
+  ["kothrud-2bhk", "rent", "Apartment", 2, "2BHK near Karve Road", "Mayur Colony", "Kothrud, Pune", 26000, 950, "Semi-furnished", "Family", false, 2, 11, 1500, "Ready to move", false, "Anjali", true, true],
+  ["hinjewadi-1bhk", "rent", "Apartment", 1, "1BHK next to Phase 1", "Megapolis Sparklet", "Hinjewadi, Pune", 17000, 600, "Fully furnished", "Bachelors", false, 2, 6, 1200, "Ready to move", false, "Rohit", false, true],
+  ["baner-3bhk-sale", "sale", "Apartment", 3, "3BHK with two balconies", "Rohan Abhilasha", "Baner, Pune", 16500000, 1500, "Semi-furnished", "Any", false, null, null, 4000, "Ready to move", true, "Mahesh", true, true],
+  ["madhapur-2bhk", "rent", "Apartment", 2, "2BHK near Hitech City", "Aparna Towers", "Madhapur, Hyderabad", 38000, 1200, "Semi-furnished", "Any", true, 2, 11, 2500, "Ready to move", false, "Lakshman", false, true],
+  ["kondapur-3bhk", "rent", "Villa", 3, "3BHK villa with garden", "Lanco Hills", "Kondapur, Hyderabad", 85000, 2600, "Semi-furnished", "Family", true, 3, 11, 6000, "Ready to move", false, "Swathi", true, true],
+  ["gachibowli-office", "lease", "Office", null, "Plug-and-play office, 40 seats", "SLN Terminus", "Gachibowli, Hyderabad", 240000, 3000, "Fully furnished", "Company", false, 6, 24, 20000, "Ready to move", false, "Venkat", false, true],
+  ["madhapur-1bhk-sale", "sale", "Apartment", 1, "1BHK investment flat", "My Home Vihanga", "Madhapur, Hyderabad", 6800000, 640, "Unfurnished", "Any", false, null, null, 2000, "Ready to move", true, "Ravi", false, false],
+  ["dlf4-3bhk", "rent", "Apartment", 3, "3BHK near Galleria Market", "Ridgewood Estate", "DLF Phase 4, Gurugram", 70000, 1800, "Semi-furnished", "Family", true, 2, 11, 6000, "Ready to move", false, "Neha", true, true],
+  ["dlf4-1bhk", "rent", "Apartment", 1, "1BHK studio for professionals", "Princeton Estate", "DLF Phase 4, Gurugram", 32000, 650, "Fully furnished", "Bachelors", false, 2, 6, 2500, "Ready to move", false, "Kunal", false, true],
+  ["saket-3bhk-sale", "sale", "Independent house", 3, "Builder floor, 3BHK", "Independent house", "Saket, New Delhi", 42000000, 1800, "Semi-furnished", "Any", false, null, null, 0, "Ready to move", false, "Amit", false, true],
+  ["saket-2bhk", "rent", "Independent house", 2, "2BHK first floor near Select City", "Independent house", "Saket, New Delhi", 45000, 1100, "Semi-furnished", "Family", false, 2, 11, 0, "Ready to move", false, "Ritu", false, true],
+  ["adyar-2bhk", "rent", "Apartment", 2, "2BHK near Theosophical Society", "Gandhi Nagar Apartments", "Adyar, Chennai", 35000, 1050, "Semi-furnished", "Family", false, 5, 11, 2000, "Ready to move", false, "Lakshmi", true, true],
+  ["annanagar-3bhk-sale", "sale", "Apartment", 3, "3BHK close to Tower Park", "Jains Avantika", "Anna Nagar, Chennai", 19500000, 1550, "Unfurnished", "Any", false, null, null, 3500, "Ready to move", true, "Senthil", false, true],
+  ["annanagar-1bhk", "rent", "Apartment", 1, "1BHK near the metro", "Shanthi Colony", "Anna Nagar, Chennai", 16000, 520, "Unfurnished", "Bachelors", false, 3, 6, 800, "Ready to move", false, "Karthik", false, true],
+  ["adyar-clinic", "lease", "Shop", null, "Ground-floor clinic space", "LB Road Complex", "Adyar, Chennai", 90000, 900, "Bare shell", "Company", false, 6, 36, 0, "Ready to move", false, "Revathi", false, true],
+];
+
+const extra: Listing[] = ROWS.map(([id, dealType, propertyType, bhk, title, society, area, price, areaSqft, furnishing, tenantPreference, petsAllowed, depositMonths, lockInMonths, maintenance, possession, reraRegistered, ownerName, mygateVerified, kycVerified]) =>
+  L({ id, dealType, propertyType, bhk, title, society, area, price, areaSqft, furnishing, tenantPreference, petsAllowed, depositMonths, lockInMonths, maintenance, possession, reraRegistered, ownerName, mygateVerified, kycVerified }),
+);
+
+export const seedListings: Listing[] = [...core, ...extra].map((l) => ({ ...l, ...(coordsFor(l.area, l.id) ?? {}) }));
 
 export const seedRequests: Request[] = [
   {

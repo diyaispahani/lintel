@@ -20,6 +20,17 @@ Owners who list on free portals (99acres, MagicBricks, NoBroker, Housing.com) pu
 | Post a **Looking for…** request so matching owners can invite you | A private dashboard shows a shortlist with a 2-line summary and the AI's reason for each enquiry |
 | Get the owner's number only when they choose you | Tap **Connect**: both sides get each other's number |
 
+### Also on every home
+
+- **Map view** of all homes (OpenStreetMap + Leaflet), with filters applied
+- **Neighbourhood:** nearest bus stop, metro, railway station and airport, plus hospitals, medical stores, schools, colleges, grocery stores, gyms and salons with distances (OpenStreetMap data, cached per home)
+- **360° street view** button that opens Google Street View at the home
+- **Home-loan EMI calculator** on homes for sale
+- **Family / Bachelors / Company** filter and tags
+- **KYC badges** for owners and seekers (simulated phone OTP + DigiLocker step; no ID numbers collected)
+
+Sample homes are marked **Sample**; homes listed by real owners are not.
+
 ## What's AI and what's plain code
 
 | Step | Who | Why |
@@ -66,4 +77,6 @@ Environment variables (never committed):
 
 - **MyGate data is simulated.** There's no public MyGate API; the move-out feed and verified badge show how a partnership would work.
 - No login: owners and seekers use private links.
-- Sample homes are demo data (phone numbers starting 90000 are fake).
+- Sample homes are demo data, marked "Sample" on the site (phone numbers starting 90000 are fake).
+- KYC is simulated; a real version needs a licensed provider (DigiLocker / Aadhaar OTP).
+- Street view opens in Google Maps; embedding it would need a Google Maps API key.

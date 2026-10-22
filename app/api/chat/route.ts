@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       seekerName,
       seekerPhone,
       phoneHash,
+      seekerKyc: body.kyc === true,
       connected: false,
       createdAt: Date.now(),
     };

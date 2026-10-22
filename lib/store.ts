@@ -44,6 +44,9 @@ export type Listing = {
   ownerName: string;
   ownerPhone: string;
   mygateVerified: boolean;
+  kycVerified: boolean; // owner passed the (simulated) KYC step
+  lat: number | null; // map position; null when the area isn't known
+  lng: number | null;
   createdAt: number;
 };
 
@@ -60,6 +63,7 @@ export type Enquiry = {
   seekerName: string;
   seekerPhone: string;
   phoneHash: string;
+  seekerKyc: boolean; // seeker passed the (simulated) KYC step
   connected: boolean; // owner tapped Connect: both see each other's number
   createdAt: number;
 };
@@ -80,7 +84,7 @@ export type Request = {
 };
 
 // What anyone can see: no phone numbers, no secret keys.
-export type PublicListing = Omit<Listing, "ownerPhone" | "ownerKey">;
+export type PublicListing = Omit<Listing, "ownerPhone" | "ownerKey"> & { sample: boolean };
 export type PublicRequest = Omit<Request, "phone" | "key" | "invitedTo">;
 
 /* ---------- Tiny key-value layer: Redis when configured, memory otherwise ---------- */
@@ -139,8 +143,9 @@ export async function allListings(): Promise<Listing[]> {
   return [...stored, ...seedListings].sort(newestFirst);
 }
 
-export function toPublic({ ownerPhone: _p, ownerKey: _k, ...rest }: Listing): PublicListing {
-  return rest;
+// Seed homes (owner key "demo") are demo data and are labelled "Sample" on the site.
+export function toPublic({ ownerPhone: _p, ownerKey, ...rest }: Listing): PublicListing {
+  return { ...rest, sample: ownerKey === "demo" };
 }
 
 /* ---------- Enquiries ---------- */
@@ -187,3 +192,8 @@ export async function allRequests(): Promise<Request[]> {
 export function requestToPublic({ phone: _p, key: _k, invitedTo: _i, ...rest }: Request): PublicRequest {
   return rest;
 }
+
+/* ---------- Small cache (e.g. nearby places per listing) ---------- */
+
+export const getCached = <T>(key: string) => kvGet<T>(`cache:${key}`);
+export const setCached = (key: string, value: unknown) => kvSet(`cache:${key}`, value);

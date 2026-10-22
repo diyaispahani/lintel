@@ -18,6 +18,13 @@ export default function ListingCard({ l }: { l: PublicListing }) {
       <div className="lbody">
         <h3 className="ltitle">{l.title}</h3>
         <p className="lsub">{l.society}</p>
+        {(l.kycVerified || l.sample || (l.dealType !== "sale" && l.tenantPreference !== "Any")) && (
+          <div className="lchips">
+            {l.kycVerified && <span className="lchip lchip-kyc">KYC verified</span>}
+            {l.dealType !== "sale" && l.tenantPreference !== "Any" && <span className="lchip">{l.tenantPreference === "Company" ? "Company lease" : `${l.tenantPreference} only`}</span>}
+            {l.sample && <span className="lchip lchip-sample" title="Demo data: not a real home">Sample</span>}
+          </div>
+        )}
         <div className="lrow"><IconCalendar /> {new Date(l.availableFrom) <= new Date() ? "Available now" : `Available from ${formatDate(l.availableFrom)}`}</div>
         <div className="lgrid2">
           <span><IconBed /> {l.bhk ? `${l.bhk} BHK` : l.propertyType}</span>

@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import ListingCard from "../ListingCard";
+import MapView, { type MapPin } from "../MapView";
 import { DEAL_LABEL, formatPrice } from "@/lib/match";
 import { AMENITIES, type DealType, type PropertyType, type PublicListing } from "@/lib/store";
 
@@ -37,11 +38,12 @@ type Filters = {
   amenities: string[];
   verified: boolean;
   sort: string;
+  view: string; // "list" | "map"
 };
 
 const EMPTY: Filters = {
   deal: "", q: "", max: "", types: [], bhk: [], furnishing: [], deposit: "", lockin: "", maintIncl: false, tenant: "",
-  pets: false, possession: "", rera: false, minArea: "", parking: "", by: "", amenities: [], verified: false, sort: "new",
+  pets: false, possession: "", rera: false, minArea: "", parking: "", by: "", amenities: [], verified: false, sort: "new", view: "list",
 };
 
 const LIST_KEYS = ["types", "bhk", "furnishing", "amenities"] as const;
@@ -86,13 +88,13 @@ function apply(listings: PublicListing[], f: Filters): PublicListing[] {
       if (f.deposit && (l.depositMonths ?? 99) > Number(f.deposit)) return false;
       if (f.lockin && (l.lockInMonths ?? 0) > Number(f.lockin)) return false;
       if (f.maintIncl && l.maintenance > 0) return false;
-      if (f.tenant && l.tenantPreference !== "Any" && l.tenantPreference !== f.tenant) return false;
       if (f.pets && !l.petsAllowed) return false;
     }
     if (f.deal === "sale") {
       if (f.possession && l.possession !== f.possession) return false;
       if (f.rera && !l.reraRegistered) return false;
     }
+    if (f.tenant && l.tenantPreference !== "Any" && l.tenantPreference !== f.tenant) return false;
     if (f.minArea && l.areaSqft < Number(f.minArea)) return false;
     if (f.parking && l.carParking < Number(f.parking)) return false;
     if (f.by && l.availableFrom > f.by) return false;
@@ -121,10 +123,27 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
   const set = <K extends keyof Filters>(key: K, value: Filters[K]) => setF((prev) => ({ ...prev, [key]: value }));
   const toggle = (key: (typeof LIST_KEYS)[number], value: string) =>
     setF((prev) => ({ ...prev, [key]: prev[key].includes(value) ? prev[key].filter((v) => v !== value) : [...prev[key], value] }));
-  const setDeal = (deal: Filters["deal"]) => setF((prev) => ({ ...prev, deal, max: "", deposit: "", lockin: "", possession: "", rera: false }));
+  const setDeal = (deal: Filters["deal"]) => setF((prev) => ({ ...prev, deal, max: "", deposit: "", lockin: "", possession: "", rera: false, tenant: deal === "sale" ? "" : prev.tenant }));
 
   const leasing = f.deal === "rent" || f.deal === "lease";
   const active = activeChips(f);
+  const pins: MapPin[] = useMemo(
+    () =>
+      results
+        .filter((l) => l.lat !== null && l.lng !== null)
+        .map((l) => ({
+          id: l.id,
+          lat: l.lat!,
+          lng: l.lng!,
+          label: formatPrice(l.price, l.dealType).replace("/month", "/mo"),
+          title: l.title,
+          sub: `${l.society} · ${l.area.split(",")[0]}`,
+          href: `/l/${l.id}`,
+          tone: l.dealType,
+        })),
+    [results],
+  );
+  const unmapped = results.length - pins.length;
 
   return (
     <div className="page-wide">
@@ -147,7 +166,7 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
         <aside className={`filters-panel ${open ? "open" : ""}`} aria-label="Filters">
           <div className="filters-top">
             <h2>Filters</h2>
-            <button className="btn-ghost btn-sm" onClick={() => setF({ ...EMPTY, deal: f.deal, sort: f.sort })}>Clear all</button>
+            <button className="btn-ghost btn-sm" onClick={() => setF({ ...EMPTY, deal: f.deal, sort: f.sort, view: f.view })}>Clear all</button>
           </div>
 
           <Group title="Location">
@@ -165,6 +184,12 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
             )}
           </Group>
 
+          {f.deal !== "sale" && (
+            <Group title="Who can live here">
+              <Pills value={f.tenant} onChange={(v) => set("tenant", v)} options={[["", "Anyone"], ["Family", "Family"], ["Bachelors", "Bachelors"], ["Company", "Company"]]} />
+            </Group>
+          )}
+
           <Group title="Property type">
             <Chips options={PROPERTY_TYPES} selected={f.types} onToggle={(v) => toggle("types", v)} />
           </Group>
@@ -180,14 +205,6 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
               </Group>
               <Group title="Lock-in period">
                 <Pills value={f.lockin} onChange={(v) => set("lockin", v)} options={[["", "Any"], ["0", "No lock-in"], ["6", "≤ 6 mo"], ["11", "≤ 11 mo"], ["24", "≤ 2 yrs"]]} />
-              </Group>
-              <Group title="Preferred tenants">
-                <select value={f.tenant} onChange={(e) => set("tenant", e.target.value)} aria-label="Preferred tenants">
-                  <option value="">Anyone</option>
-                  <option value="Family">Family</option>
-                  <option value="Bachelors">Bachelors</option>
-                  <option value="Company">Company lease</option>
-                </select>
               </Group>
               <Group title="Terms">
                 <Check checked={f.maintIncl} onChange={(v) => set("maintIncl", v)} label="Maintenance included in rent" />
@@ -246,6 +263,10 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
               Filters{active.length ? ` (${active.length})` : ""}
             </button>
             <span className="muted">{results.length} {results.length === 1 ? "property" : "properties"}</span>
+            <div className="view-toggle" role="radiogroup" aria-label="View">
+              <button type="button" className={f.view !== "map" ? "on" : ""} aria-pressed={f.view !== "map"} onClick={() => set("view", "list")}>List</button>
+              <button type="button" className={f.view === "map" ? "on" : ""} aria-pressed={f.view === "map"} onClick={() => set("view", "map")}>Map</button>
+            </div>
             <select value={f.sort} onChange={(e) => set("sort", e.target.value)} className="sort" aria-label="Sort by">
               <option value="new">Newest first</option>
               <option value="low">Price: low to high</option>
@@ -272,7 +293,12 @@ export default function Explorer({ listings, initial }: { listings: PublicListin
             </div>
           )}
 
-          {results.length > 0 ? (
+          {results.length > 0 && f.view === "map" ? (
+            <>
+              <MapView pins={pins} height={640} />
+              {unmapped > 0 && <p className="muted small" style={{ marginTop: 10 }}>{unmapped} {unmapped === 1 ? "home has" : "homes have"} no map location yet and {unmapped === 1 ? "shows" : "show"} in the list view only.</p>}
+            </>
+          ) : results.length > 0 ? (
             <div className="lgrid">{results.map((l) => <ListingCard key={l.id} l={l} />)}</div>
           ) : (
             <div className="empty">
