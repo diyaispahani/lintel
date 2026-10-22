@@ -1,28 +1,53 @@
 import type { Metadata, Viewport } from "next";
+import { Fraunces, Inter } from "next/font/google";
 import Link from "next/link";
+import Logo from "./Logo";
 import "./globals.css";
 
+const display = Fraunces({ subsets: ["latin"], variable: "--font-display", axes: ["opsz"] });
+const body = Inter({ subsets: ["latin"], variable: "--font-body" });
+
 export const metadata: Metadata = {
-  title: "GharDirect",
-  description: "Rent, buy or lease directly from owners. Zero brokers.",
+  title: "GharDirect: homes straight from owners",
+  description: "Rent, buy or lease directly from owners. Zero brokers, AI-screened enquiries, MyGate-verified homes.",
 };
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
-        <header className="topbar">
-          <Link href="/" className="brand">🏠 GharDirect</Link>
-          <nav>
-            <Link href="/">Browse</Link>
-            <Link href="/list">List property</Link>
-            <Link href="/wanted">Looking for…</Link>
-            <Link href="/mygate">MyGate</Link>
-          </nav>
+        <header className="site-header">
+          <div className="container header-inner">
+            <Link href="/" className="brand" aria-label="GharDirect home">
+              <Logo />
+              <span>GharDirect</span>
+            </Link>
+            <nav className="nav">
+              <Link href="/listings">Explore homes</Link>
+              <Link href="/wanted">Post a requirement</Link>
+              <Link href="/mygate">MyGate</Link>
+              <Link href="/list" className="btn btn-primary btn-sm">List your property</Link>
+            </nav>
+          </div>
         </header>
-        <main>{children}</main>
+        {children}
+        <footer className="site-footer">
+          <div className="container footer-inner">
+            <div>
+              <Link href="/" className="brand"><Logo /><span>GharDirect</span></Link>
+              <p className="muted small">Homes straight from owners. Zero brokerage, always.</p>
+            </div>
+            <div className="footer-links">
+              <Link href="/listings?deal=rent">Rent</Link>
+              <Link href="/listings?deal=sale">Buy</Link>
+              <Link href="/listings?deal=lease">Lease</Link>
+              <Link href="/list">List property</Link>
+            </div>
+            <p className="muted small">Prototype · MyGate data is simulated for demo purposes.</p>
+          </div>
+        </footer>
       </body>
     </html>
   );

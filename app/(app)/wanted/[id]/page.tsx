@@ -1,8 +1,8 @@
 // A seeker's private page: owners who invited them, and every listing that matches.
 
-import Link from "next/link";
+import ListingCard from "@/app/ListingCard";
 import { DEAL_LABEL, formatPrice, matches } from "@/lib/match";
-import { allListings, getRequest, requestToPublic, toPublic, type PublicListing } from "@/lib/store";
+import { allListings, getRequest, requestToPublic, toPublic } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
@@ -33,23 +33,10 @@ export default async function MyRequest({
       </p>
 
       <h2>✉️ Owners who invited you</h2>
-      {invited.length === 0 ? <div className="card muted">No invites yet. Owners with a match will see your request.</div> : invited.map((l) => <ListingCard key={l.id} l={l} />)}
+      {invited.length === 0 ? <div className="card muted">No invites yet. Owners with a match will see your request.</div> : <div className="lgrid">{invited.map((l) => <ListingCard key={l.id} l={l} />)}</div>}
 
       <h2 style={{ marginTop: 24 }}>Other matching properties</h2>
-      {matching.length === 0 ? <div className="card muted">Nothing else matches right now.</div> : matching.map((l) => <ListingCard key={l.id} l={l} />)}
+      {matching.length === 0 ? <div className="card muted">Nothing else matches right now.</div> : <div className="lgrid">{matching.map((l) => <ListingCard key={l.id} l={l} />)}</div>}
     </>
-  );
-}
-
-function ListingCard({ l }: { l: PublicListing }) {
-  return (
-    <Link href={`/l/${l.id}`} className="card">
-      <div className="row between">
-        <span className="price">{formatPrice(l.price, l.dealType)}</span>
-        {l.mygateVerified && <span className="badge mygate">✓ MyGate verified</span>}
-      </div>
-      <strong>{l.title}</strong>
-      <div className="muted">📍 {l.society}, {l.area}</div>
-    </Link>
   );
 }

@@ -1,85 +1,159 @@
-// Browse: every listing is from an owner. Filters are a plain HTML form (no JavaScript needed).
+// Landing page.
 
 import Link from "next/link";
-import { DEAL_LABEL, formatDate, formatPrice } from "@/lib/match";
-import { allListings, toPublic, type DealType } from "@/lib/store";
+import { allListings, toPublic } from "@/lib/store";
+import HeroAnimation from "./HeroAnimation";
+import ListingCard from "./ListingCard";
+import SavingsCalc from "./SavingsCalc";
 
 export const dynamic = "force-dynamic";
 
-type Filters = { deal?: string; area?: string; max?: string; bhk?: string };
+const STEPS_SEEKER = [
+  ["Find a home", "Every listing is posted by the owner. Filter by deposit, lock-in, pets and more."],
+  ["Answer 4 quick questions", "Our AI asks what the owner needs to know, so they can tell you're genuine."],
+  ["Connect when you both say yes", "Numbers are shared only when the owner taps Connect. No middlemen."],
+];
+const STEPS_OWNER = [
+  ["List in two minutes", "Or one tap from MyGate when you're moving out. Your number stays hidden."],
+  ["Brokers get filtered out", "AI reads every enquiry and hides brokers and sales pitches."],
+  ["Pick who you talk to", "See a shortlist with a 2-line summary each, and connect with the right one."],
+];
 
-export default async function Browse({ searchParams }: { searchParams: Promise<Filters> }) {
-  const f = await searchParams;
-  const max = Number(f.max) || 0;
-  const bhk = Number(f.bhk) || 0;
-  const area = (f.area ?? "").trim().toLowerCase();
-
-  const results = allListings()
-    .map(toPublic)
-    .filter((l) => !f.deal || l.dealType === f.deal)
-    .filter((l) => !area || `${l.area} ${l.society}`.toLowerCase().includes(area))
-    .filter((l) => !max || l.price <= max)
-    .filter((l) => !bhk || l.bhk === bhk);
+export default function Landing() {
+  const featured = allListings().filter((l) => l.mygateVerified).slice(0, 3).map(toPublic);
 
   return (
     <>
-      <div className="hero">
-        <h1>Rent, buy or lease. Straight from the owner.</h1>
-        <p className="muted">No brokers, no spam calls. An AI checks every enquiry, and owner and seeker connect only when both say yes.</p>
-      </div>
+      <section className="hero">
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <p className="eyebrow">Zero brokerage · Owner-direct</p>
+            <h1 className="hero-title">Home, <em>direct.</em></h1>
+            <p className="hero-sub">
+              Rent, buy or lease straight from owners. No brokers, no spam calls. An AI checks every enquiry, and you connect only when you both say yes.
+            </p>
 
-      <form className="card filters" method="get">
-        <div>
-          <label htmlFor="deal">I want to</label>
-          <select id="deal" name="deal" defaultValue={f.deal ?? ""}>
-            <option value="">Any</option>
-            {(Object.keys(DEAL_LABEL) as DealType[]).map((d) => (
-              <option key={d} value={d}>{DEAL_LABEL[d]}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="area">Area</label>
-          <input id="area" name="area" defaultValue={f.area ?? ""} placeholder="e.g. HSR" />
-        </div>
-        <div>
-          <label htmlFor="max">Max price (₹)</label>
-          <input id="max" name="max" defaultValue={f.max ?? ""} inputMode="numeric" placeholder="e.g. 35000" />
-        </div>
-        <div>
-          <label htmlFor="bhk">BHK</label>
-          <select id="bhk" name="bhk" defaultValue={f.bhk ?? ""}>
-            <option value="">Any</option>
-            {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n} BHK</option>)}
-          </select>
-        </div>
-        <button>Search</button>
-      </form>
+            <form action="/listings" className="search">
+              <div className="seg" role="radiogroup" aria-label="I want to">
+                {[["rent", "Rent"], ["sale", "Buy"], ["lease", "Lease"]].map(([v, label], i) => (
+                  <label key={v} className="seg-opt">
+                    <input type="radio" name="deal" value={v} defaultChecked={i === 0} />
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="search-row">
+                <input name="q" placeholder="Area, society or city, e.g. HSR Layout" aria-label="Area, society or city" />
+                <button className="btn-lg">Search</button>
+              </div>
+            </form>
 
-      <p className="muted small">{results.length} {results.length === 1 ? "property" : "properties"} · all listed by owners</p>
-
-      {results.map((l) => (
-        <Link key={l.id} href={`/l/${l.id}`} className="card">
-          <div className="row between">
-            <span className="price">{formatPrice(l.price, l.dealType)}</span>
-            <span className="row">
-              <span className="badge deal">{DEAL_LABEL[l.dealType]}</span>
-              {l.mygateVerified && <span className="badge mygate">✓ MyGate verified</span>}
-            </span>
+            <ul className="trust">
+              <li>₹0 brokerage, always</li>
+              <li>Owner-listed homes only</li>
+              <li>Your number stays private</li>
+            </ul>
           </div>
-          <h2 style={{ margin: "4px 0 0" }}>{l.title}</h2>
-          <div className="muted">📍 {l.society}, {l.area}</div>
-          <div className="muted small">
-            {l.bhk ? `${l.bhk} BHK` : "Commercial"} · {l.furnishing} · from {formatDate(l.availableFrom)} · <span className="badge owner">Listed by owner · 0 brokers</span>
+          <div className="hero-art">
+            <HeroAnimation />
           </div>
-        </Link>
-      ))}
-
-      {results.length === 0 && (
-        <div className="card">
-          Nothing matches yet. <Link href="/wanted">Post what you&apos;re looking for</Link> and owners can invite you.
         </div>
-      )}
+      </section>
+
+      <section className="band">
+        <div className="container compare">
+          <div className="compare-card old">
+            <p className="eyebrow muted">The old way</p>
+            <h2>Your number goes public. The calls never stop.</h2>
+            <ul>
+              <li>Brokers flood owners within minutes of listing</li>
+              <li>Tenants pay a month&apos;s rent just to be introduced</li>
+              <li>Portals push paid plans with more calls</li>
+            </ul>
+          </div>
+          <div className="compare-card new">
+            <p className="eyebrow">With GharDirect</p>
+            <h2>Owner and seeker, nothing in between.</h2>
+            <ul>
+              <li>Numbers hidden until both sides agree</li>
+              <li>AI screens out brokers and sales pitches</li>
+              <li>MyGate-verified owners you can trust</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="container section">
+        <p className="eyebrow">How it works</p>
+        <h2 className="section-title">Simple for both sides.</h2>
+        <div className="how">
+          {[["For seekers", STEPS_SEEKER], ["For owners", STEPS_OWNER]].map(([title, steps]) => (
+            <div key={title as string} className="how-col">
+              <h3>{title as string}</h3>
+              <ol>
+                {(steps as string[][]).map(([h, p], i) => (
+                  <li key={h}>
+                    <span className="step-n">{i + 1}</span>
+                    <div><strong>{h}</strong><p className="muted">{p}</p></div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="container section">
+        <div className="row between section-head">
+          <div>
+            <p className="eyebrow">MyGate-verified homes</p>
+            <h2 className="section-title">Fresh from owners this week.</h2>
+          </div>
+          <Link href="/listings" className="btn btn-ghost">Explore all homes →</Link>
+        </div>
+        <div className="lgrid">
+          {featured.map((l) => <ListingCard key={l.id} l={l} />)}
+        </div>
+      </section>
+
+      <section className="container section split">
+        <div>
+          <p className="eyebrow">Do the maths</p>
+          <h2 className="section-title">Keep the month&apos;s rent a broker would take.</h2>
+          <p className="muted">Slide to your budget. On GharDirect there&apos;s no brokerage for owners or seekers, ever.</p>
+        </div>
+        <SavingsCalc />
+      </section>
+
+      <section className="container section">
+        <div className="mygate-band">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--mygate)" }}>MyGate × GharDirect</p>
+            <h2 className="section-title">Moving out? List it in one tap.</h2>
+            <p className="muted">
+              MyGate knows when a flat is about to be vacated and who really owns it. GharDirect turns that into a verified, broker-free listing,
+              pre-filled and ready to publish.
+            </p>
+            <Link href="/mygate" className="btn btn-ghost">See the MyGate demo →</Link>
+          </div>
+          <ul className="mygate-points">
+            <li><strong>Move-out alerts</strong><span>Know before the flat goes empty</span></li>
+            <li><strong>Verified owners</strong><span>Matched to the society&apos;s flat records</span></li>
+            <li><strong>Trusted badge</strong><span>Seekers see who&apos;s real at a glance</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="container section">
+        <div className="cta">
+          <h2 className="display">Ready to go direct?</h2>
+          <p>Find your next home, or list yours, without paying a single rupee in brokerage.</p>
+          <div className="row" style={{ justifyContent: "center" }}>
+            <Link href="/listings" className="btn btn-brass btn-lg">Explore homes</Link>
+            <Link href="/list" className="btn btn-lg cta-ghost">List your property</Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

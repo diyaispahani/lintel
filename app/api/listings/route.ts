@@ -2,9 +2,10 @@
 
 import { getNotice } from "@/lib/mygate";
 import { validPhone } from "@/lib/rules";
-import { createListing, type DealType } from "@/lib/store";
+import { AMENITIES, createListing, type DealType, type PropertyType } from "@/lib/store";
 
 const DEALS: DealType[] = ["rent", "sale", "lease"];
+const PROPERTY_TYPES: PropertyType[] = ["Apartment", "Independent house", "Villa", "Office", "Shop"];
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
@@ -31,15 +32,36 @@ export async function POST(req: Request) {
   // Simulated MyGate check: verified if it came from a real move-out notice for this society.
   const notice = typeof body.mygateId === "string" ? getNotice(body.mygateId) : undefined;
 
+  const num = (name: string) => {
+    const v = Number(String(body[name] ?? "").replace(/[^\d.]/g, ""));
+    return Number.isFinite(v) ? v : 0;
+  };
+  const oneOf = <T extends string>(value: unknown, options: readonly T[], fallback: T): T =>
+    options.includes(value as T) ? (value as T) : fallback;
+  const isSale = dealType === "sale";
+  const propertyType = oneOf(body.propertyType, PROPERTY_TYPES, "Apartment");
+  const commercial = propertyType === "Office" || propertyType === "Shop";
+
   const listing = createListing({
     dealType,
     title,
     society,
     area,
     price,
-    bhk,
+    bhk: commercial ? null : bhk,
+    propertyType,
+    areaSqft: num("areaSqft"),
     furnishing: field("furnishing", 40) || "Unfurnished",
     availableFrom: field("availableFrom", 20),
+    depositMonths: isSale ? null : num("depositMonths"),
+    lockInMonths: isSale ? null : num("lockInMonths"),
+    maintenance: num("maintenance"),
+    tenantPreference: oneOf(body.tenantPreference, ["Any", "Family", "Bachelors", "Company"] as const, "Any"),
+    petsAllowed: body.petsAllowed === true,
+    carParking: num("carParking"),
+    amenities: Array.isArray(body.amenities) ? body.amenities.filter((a: unknown) => (AMENITIES as readonly unknown[]).includes(a)) : [],
+    possession: oneOf(body.possession, ["Ready to move", "Under construction"] as const, "Ready to move"),
+    reraRegistered: isSale && body.reraRegistered === true,
     details: field("details", 1500),
     ownerName: field("ownerName", 40) || "Owner",
     ownerPhone,

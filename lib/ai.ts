@@ -52,9 +52,13 @@ function describe(listing: PublicListing, transcript: Turn[]) {
     `Society: ${listing.society}`,
     `Area: ${listing.area}`,
     `Price: ${formatPrice(listing.price, listing.dealType)}`,
-    `Size: ${listing.bhk ? `${listing.bhk} BHK` : "Commercial space"}`,
+    `Type: ${listing.propertyType}${listing.bhk ? `, ${listing.bhk} BHK` : ""}, ${listing.areaSqft} sq ft carpet`,
     `Furnishing: ${listing.furnishing}`,
     `Available from: ${listing.availableFrom}`,
+    listing.dealType === "sale"
+      ? `Possession: ${listing.possession}. RERA registered: ${listing.reraRegistered ? "yes" : "no"}`
+      : `Deposit: ${listing.depositMonths} months. Lock-in: ${listing.lockInMonths ? `${listing.lockInMonths} months` : "none"}. Maintenance: ${listing.maintenance ? `₹${listing.maintenance}/month` : "included"}. Preferred: ${listing.tenantPreference}. Pets: ${listing.petsAllowed ? "allowed" : "not allowed"}`,
+    `Car parking: ${listing.carParking}. Amenities: ${listing.amenities.join(", ") || "none listed"}`,
     `Details: ${listing.details}`,
   ].join("\n");
   const chat = transcript.map((t) => `${t.role === "ai" ? "Assistant" : "Seeker"}: ${t.text}`).join("\n");

@@ -7,3 +7,5 @@ next-env.d.ts
 # Secrets: never commit
 .env*
 .env.local
+.vercel
+.vercel-temporary/

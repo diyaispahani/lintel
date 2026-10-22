@@ -5,6 +5,11 @@ import { createHash, randomBytes } from "crypto";
 import { seedListings, seedRequests } from "./seed";
 
 export type DealType = "rent" | "sale" | "lease";
+export type PropertyType = "Apartment" | "Independent house" | "Villa" | "Office" | "Shop";
+export type TenantPreference = "Any" | "Family" | "Bachelors" | "Company";
+export type Possession = "Ready to move" | "Under construction";
+
+export const AMENITIES = ["Lift", "Power backup", "24x7 security", "Gym", "Swimming pool", "Clubhouse", "Gated society", "Visitor parking"] as const;
 export type Label = "Genuine" | "Broker" | "Sales pitch" | "Unclear";
 export type Turn = { role: "ai" | "seeker"; text: string };
 
@@ -17,8 +22,21 @@ export type Listing = {
   area: string;
   price: number; // rupees: per month for rent/lease, total for sale
   bhk: number | null; // null for commercial space
+  propertyType: PropertyType;
+  areaSqft: number; // carpet area
   furnishing: string;
   availableFrom: string;
+  // Rent and lease terms (null for sale)
+  depositMonths: number | null; // security deposit, in months of rent
+  lockInMonths: number | null; // 0 = no lock-in
+  maintenance: number; // per month; 0 = included in rent
+  tenantPreference: TenantPreference;
+  petsAllowed: boolean;
+  carParking: number; // covered car spots
+  amenities: string[];
+  // Sale terms
+  possession: Possession;
+  reraRegistered: boolean;
   details: string;
   ownerName: string;
   ownerPhone: string;
