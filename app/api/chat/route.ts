@@ -10,7 +10,7 @@ export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  const listing = typeof body.listingId === "string" ? getListing(body.listingId) : undefined;
+  const listing = typeof body.listingId === "string" ? await getListing(body.listingId) : undefined;
   if (!listing) return Response.json({ error: "This listing no longer exists." }, { status: 404 });
 
   const seekerName = typeof body.contact?.name === "string" ? body.contact.name.trim().slice(0, 60) : "";
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Please enter your name and a valid 10-digit phone number." }, { status: 400 });
   }
   const phoneHash = hashPhone(seekerPhone);
-  if (isDuplicate(listing.id, phoneHash)) {
+  if (await isDuplicate(listing.id, phoneHash)) {
     return Response.json({ error: "You've already enquired about this property. The owner will connect if it's a fit." }, { status: 409 });
   }
 
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
       connected: false,
       createdAt: Date.now(),
     };
-    saveEnquiry(enquiry);
+    await saveEnquiry(enquiry, true);
     console.log(`[ghar] enquiry on ${listing.id}: AI said ${result.label} (${result.confidence}), shown as ${label}${hidden ? ", hidden" : ""}`);
     return Response.json({ reply, done, enquiryId: enquiry.id });
   } catch (err) {

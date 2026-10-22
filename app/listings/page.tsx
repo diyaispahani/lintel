@@ -7,5 +7,5 @@ export const dynamic = "force-dynamic";
 
 export default async function ListingsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const params = await searchParams;
-  return <Explorer listings={allListings().map(toPublic)} initial={params} />;
+  return <Explorer listings={(await allListings()).map(toPublic)} initial={params} />;
 }

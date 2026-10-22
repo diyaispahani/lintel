@@ -1,7 +1,10 @@
-// In-memory storage for the demo, pre-filled with seed data so it's never empty.
-// Phone numbers live only here. They are never sent to the AI and only revealed after Connect.
+// Storage. On Vercel this is an Upstash Redis database, so every server sees the
+// same listings, enquiries and requests. Without database settings (local dev),
+// it falls back to memory. Seed demo data lives in code and is always present.
+// Phone numbers are never sent to the AI and only revealed after Connect.
 
 import { createHash, randomBytes } from "crypto";
+import { Redis } from "@upstash/redis";
 import { seedListings, seedRequests } from "./seed";
 
 export type DealType = "rent" | "sale" | "lease";
@@ -80,50 +83,106 @@ export type Request = {
 export type PublicListing = Omit<Listing, "ownerPhone" | "ownerKey">;
 export type PublicRequest = Omit<Request, "phone" | "key" | "invitedTo">;
 
-const db = globalThis as unknown as {
-  ghar?: { listings: Map<string, Listing>; enquiries: Map<string, Enquiry>; requests: Map<string, Request> };
-};
-db.ghar ??= {
-  listings: new Map(seedListings.map((l) => [l.id, l])),
-  enquiries: new Map(),
-  requests: new Map(seedRequests.map((r) => [r.id, r])),
-};
-const { listings, enquiries, requests } = db.ghar;
+/* ---------- Tiny key-value layer: Redis when configured, memory otherwise ---------- */
+
+const redis =
+  (process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL) ? Redis.fromEnv() : null;
+
+const mem = globalThis as unknown as { gharKv?: { values: Map<string, unknown>; lists: Map<string, string[]> } };
+mem.gharKv ??= { values: new Map(), lists: new Map() };
+const { values, lists } = mem.gharKv;
+
+async function kvGet<T>(key: string): Promise<T | null> {
+  if (redis) return (await redis.get<T>(key)) ?? null;
+  return (values.get(key) as T) ?? null;
+}
+async function kvSet(key: string, value: unknown): Promise<void> {
+  if (redis) await redis.set(key, value);
+  else values.set(key, value);
+}
+async function kvMGet<T>(keys: string[]): Promise<T[]> {
+  if (!keys.length) return [];
+  const got = redis ? await redis.mget<(T | null)[]>(...keys) : keys.map((k) => (values.get(k) as T) ?? null);
+  return got.filter((v): v is T => v !== null);
+}
+async function kvPush(key: string, id: string): Promise<void> {
+  if (redis) await redis.lpush(key, id);
+  else lists.set(key, [id, ...(lists.get(key) ?? [])]);
+}
+async function kvList(key: string): Promise<string[]> {
+  if (redis) return await redis.lrange<string>(key, 0, -1);
+  return lists.get(key) ?? [];
+}
+
+/* ---------- Helpers ---------- */
 
 export const newId = (bytes = 6) => randomBytes(bytes).toString("base64url");
 export const hashPhone = (phone: string) => createHash("sha256").update(phone.replace(/\D/g, "").slice(-10)).digest("hex");
+const newestFirst = <T extends { createdAt: number }>(a: T, b: T) => b.createdAt - a.createdAt;
 
-export function createListing(fields: Omit<Listing, "id" | "ownerKey" | "createdAt">): Listing {
+/* ---------- Listings ---------- */
+
+export async function createListing(fields: Omit<Listing, "id" | "ownerKey" | "createdAt">): Promise<Listing> {
   const listing = { ...fields, id: newId(), ownerKey: newId(16), createdAt: Date.now() };
-  listings.set(listing.id, listing);
+  await kvSet(`listing:${listing.id}`, listing);
+  await kvPush("listings", listing.id);
   return listing;
 }
 
-export const getListing = (id: string) => listings.get(id);
-export const allListings = () => [...listings.values()].sort((a, b) => b.createdAt - a.createdAt);
+export async function getListing(id: string): Promise<Listing | undefined> {
+  return seedListings.find((l) => l.id === id) ?? (await kvGet<Listing>(`listing:${id}`)) ?? undefined;
+}
+
+export async function allListings(): Promise<Listing[]> {
+  const ids = await kvList("listings");
+  const stored = await kvMGet<Listing>(ids.map((id) => `listing:${id}`));
+  return [...stored, ...seedListings].sort(newestFirst);
+}
 
 export function toPublic({ ownerPhone: _p, ownerKey: _k, ...rest }: Listing): PublicListing {
   return rest;
 }
 
-export function saveEnquiry(enquiry: Enquiry) {
-  enquiries.set(enquiry.id, enquiry);
+/* ---------- Enquiries ---------- */
+
+export async function saveEnquiry(enquiry: Enquiry, isNew = false): Promise<void> {
+  await kvSet(`enquiry:${enquiry.id}`, enquiry);
+  if (isNew) await kvPush(`enquiries:${enquiry.listingId}`, enquiry.id);
 }
 
-export const getEnquiry = (id: string) => enquiries.get(id);
-
-export function enquiriesFor(listingId: string): Enquiry[] {
-  return [...enquiries.values()].filter((e) => e.listingId === listingId).sort((a, b) => b.createdAt - a.createdAt);
+export async function getEnquiry(id: string): Promise<Enquiry | undefined> {
+  return (await kvGet<Enquiry>(`enquiry:${id}`)) ?? undefined;
 }
 
-export function createRequest(fields: Omit<Request, "id" | "key" | "invitedTo" | "createdAt">): Request {
+export async function enquiriesFor(listingId: string): Promise<Enquiry[]> {
+  const ids = await kvList(`enquiries:${listingId}`);
+  return (await kvMGet<Enquiry>(ids.map((id) => `enquiry:${id}`))).sort(newestFirst);
+}
+
+/* ---------- "Looking for…" requests ---------- */
+
+export async function createRequest(fields: Omit<Request, "id" | "key" | "invitedTo" | "createdAt">): Promise<Request> {
   const request = { ...fields, id: newId(), key: newId(16), invitedTo: [], createdAt: Date.now() };
-  requests.set(request.id, request);
+  await kvSet(`request:${request.id}`, request);
+  await kvPush("requests", request.id);
   return request;
 }
 
-export const getRequest = (id: string) => requests.get(id);
-export const allRequests = () => [...requests.values()].sort((a, b) => b.createdAt - a.createdAt);
+// A stored copy wins over the seed, so invites on seed requests are remembered.
+export async function getRequest(id: string): Promise<Request | undefined> {
+  return (await kvGet<Request>(`request:${id}`)) ?? seedRequests.find((r) => r.id === id);
+}
+
+export async function saveRequest(request: Request): Promise<void> {
+  await kvSet(`request:${request.id}`, request);
+}
+
+export async function allRequests(): Promise<Request[]> {
+  const ids = await kvList("requests");
+  const stored = await kvMGet<Request>(ids.map((id) => `request:${id}`));
+  const seeds = await Promise.all(seedRequests.map((r) => getRequest(r.id)));
+  return [...stored, ...seeds.filter((r): r is Request => !!r)].sort(newestFirst);
+}
 
 export function requestToPublic({ phone: _p, key: _k, invitedTo: _i, ...rest }: Request): PublicRequest {
   return rest;

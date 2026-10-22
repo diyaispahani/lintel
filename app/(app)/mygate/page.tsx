@@ -1,4 +1,4 @@
-// SIMULATED MyGate screen: flats being vacated, one tap to list them on GharDirect.
+// SIMULATED MyGate screen: flats being vacated, one tap to list them on Lintel.
 
 import Link from "next/link";
 import { formatDate } from "@/lib/match";
@@ -7,10 +7,10 @@ import { moveOutNotices } from "@/lib/mygate";
 export default function MyGatePage() {
   return (
     <>
-      <h1>MyGate × GharDirect</h1>
+      <h1>MyGate × Lintel</h1>
       <p className="demo-banner">Demo: simulated MyGate data. This shows how a MyGate partnership would work.</p>
       <p className="muted">
-        MyGate already knows when a resident is moving out, and who really owns or lives in each flat. GharDirect turns that into a
+        MyGate already knows when a resident is moving out, and who really owns or lives in each flat. Lintel turns that into a
         verified, broker-free listing in one tap.
       </p>
 
@@ -23,7 +23,7 @@ export default function MyGatePage() {
           </div>
           <div className="muted">{n.area} · {n.bhk} BHK · Owner: {n.ownerName} (verified resident)</div>
           <Link href={`/list?mygate=${n.id}`} className="button" style={{ marginTop: 10 }}>
-            List on GharDirect →
+            List on Lintel →
           </Link>
         </div>
       ))}

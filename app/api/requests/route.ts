@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Please enter your name and a valid 10-digit phone number." }, { status: 400 });
   }
 
-  const request = createRequest({
+  const request = await createRequest({
     dealType,
     area: field("area", 80),
     maxBudget,

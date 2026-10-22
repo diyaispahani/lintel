@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   const propertyType = oneOf(body.propertyType, PROPERTY_TYPES, "Apartment");
   const commercial = propertyType === "Office" || propertyType === "Shop";
 
-  const listing = createListing({
+  const listing = await createListing({
     dealType,
     title,
     society,

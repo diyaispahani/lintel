@@ -22,8 +22,8 @@ const TILES: { type: PropertyType; tone: string; cls: string }[] = [
 
 const TONES = ["blush", "lavender", "butter", "mint"];
 
-export default function Landing() {
-  const listings = allListings().map(toPublic);
+export default async function Landing() {
+  const listings = (await allListings()).map(toPublic);
   const featured = listings.slice(0, 8);
   const cities = new Set(listings.map((l) => l.area.split(",").pop()?.trim())).size;
 
@@ -69,7 +69,7 @@ export default function Landing() {
       </section>
 
       <section className="promise-strip container">
-        <p className="eyebrow">The GharDirect promise</p>
+        <p className="eyebrow">The Lintel promise</p>
         <div className="promises">
           <span>₹0 brokerage, ever</span>
           <span>Every home listed by its owner</span>
@@ -163,7 +163,7 @@ export default function Landing() {
             Keep the month&apos;s rent
             <em>a broker would take</em>
           </h2>
-          <p className="muted" style={{ maxWidth: 440 }}>There is no brokerage on GharDirect, for owners or seekers. Move the slider to see what that means for you.</p>
+          <p className="muted" style={{ maxWidth: 440 }}>There is no brokerage on Lintel, for owners or seekers. Move the slider to see what that means for you.</p>
         </div>
         <SavingsCalc />
       </section>
@@ -176,7 +176,7 @@ export default function Landing() {
               <em>List it in one tap.</em>
             </h2>
             <p style={{ maxWidth: 460 }}>
-              MyGate knows when a flat is about to be vacated, and who really owns it. GharDirect turns that into a verified, broker-free listing,
+              MyGate knows when a flat is about to be vacated, and who really owns it. Lintel turns that into a verified, broker-free listing,
               ready to publish.
             </p>
             <Link href="/mygate" className="btn-ink">See the MyGate demo</Link>

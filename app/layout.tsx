@@ -8,7 +8,7 @@ const display = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["n
 const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
-  title: "GharDirect: homes straight from owners",
+  title: "Lintel: homes straight from owners",
   description: "Rent, buy or lease directly from owners. Zero brokers, AI-screened enquiries, MyGate-verified homes.",
 };
 
@@ -19,9 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body>
         <header className="site-header">
-          <Link href="/" className="brand-pill" aria-label="GharDirect home">
+          <Link href="/" className="brand-pill" aria-label="Lintel home">
             <Logo />
-            <span>GharDirect</span>
+            <span>Lintel</span>
           </Link>
           <nav className="nav-pill">
             <Link href="/listings">All homes</Link>
@@ -34,8 +34,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="site-footer">
           <div className="container footer-inner">
             <div>
-              <Link href="/" className="brand"><Logo /><span>GharDirect</span></Link>
-              <p className="muted small" style={{ marginTop: 10 }}>Homes straight from owners. Zero brokerage, always.</p>
+              <Link href="/" className="brand"><Logo /><span>Lintel</span></Link>
+              <p className="muted small" style={{ marginTop: 10 }}>Every door, owner to you. Zero brokerage, always.</p>
             </div>
             <div className="footer-links">
               <Link href="/listings?deal=rent">Rent</Link>

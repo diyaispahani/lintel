@@ -19,7 +19,7 @@ export default function SavingsCalc() {
           <strong className="calc-old">{inr(rent)}</strong>
         </div>
         <div>
-          <span>On GharDirect</span>
+          <span>On Lintel</span>
           <strong className="calc-new">₹0</strong>
         </div>
       </div>

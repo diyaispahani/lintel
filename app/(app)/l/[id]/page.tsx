@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ListingPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const listing = getListing(id);
+  const listing = await getListing(id);
   if (!listing) notFound();
   const l = toPublic(listing);
   const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;

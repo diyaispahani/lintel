@@ -11,8 +11,8 @@ export function applyRules(aiLabel: Label, confidence: number): { label: Label; 
 }
 
 // One enquiry per phone number per listing.
-export function isDuplicate(listingId: string, phoneHash: string): boolean {
-  return enquiriesFor(listingId).some((e) => e.phoneHash === phoneHash);
+export async function isDuplicate(listingId: string, phoneHash: string): Promise<boolean> {
+  return (await enquiriesFor(listingId)).some((e) => e.phoneHash === phoneHash);
 }
 
 export function validPhone(phone: string): boolean {

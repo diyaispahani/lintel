@@ -6,19 +6,19 @@ import { allRequests, enquiriesFor, getListing, requestToPublic, toPublic } from
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const listing = getListing(id);
+  const listing = await getListing(id);
   const key = new URL(req.url).searchParams.get("key");
   if (!listing || key !== listing.ownerKey) {
     return Response.json({ error: "This dashboard link isn't valid." }, { status: 404 });
   }
   const flat = toPublic(listing);
 
-  const enquiries = enquiriesFor(id).map(({ transcript: _t, phoneHash: _h, seekerName, seekerPhone, ...rest }) => ({
+  const enquiries = (await enquiriesFor(id)).map(({ transcript: _t, phoneHash: _h, seekerName, seekerPhone, ...rest }) => ({
     ...rest,
     seeker: rest.connected ? { name: seekerName, phone: seekerPhone } : null,
   }));
 
-  const matchingRequests = allRequests()
+  const matchingRequests = (await allRequests())
     .filter((r) => matches(requestToPublic(r), flat))
     .map((r) => ({ ...requestToPublic(r), invited: r.invitedTo.includes(id) }));
 

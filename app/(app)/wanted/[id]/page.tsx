@@ -15,11 +15,11 @@ export default async function MyRequest({
 }) {
   const { id } = await params;
   const { key } = await searchParams;
-  const request = getRequest(id);
+  const request = await getRequest(id);
   if (!request || key !== request.key) return <div className="error">This link isn&apos;t valid.</div>;
 
   const pub = requestToPublic(request);
-  const listings = allListings().map(toPublic);
+  const listings = (await allListings()).map(toPublic);
   const invited = listings.filter((l) => request.invitedTo.includes(l.id));
   const matching = listings.filter((l) => matches(pub, l) && !request.invitedTo.includes(l.id));
 
